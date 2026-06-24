@@ -1,4 +1,6 @@
 import streamlit as st
+from src.pdf_parser import extract_text_from_pdf
+from src.analyzer import analyze_resume
 
 
 def configure_page():
@@ -64,10 +66,14 @@ def handle_analysis_request(uploaded_resume, job_description: str):
         if not job_description.strip():
             st.warning("Please enter a job description.")
             return
-        st.success(
-            "Application setup completed successfully. "
-            "Resume analysis functionality will be implemented in upcoming sprints."
-        )
+        resume_text = extract_text_from_pdf(uploaded_resume)
+        analysis_result = analyze_resume(resume_text=resume_text, job_description=job_description)
+
+        st.success("Resume analyzed successfully.")
+
+        st.subheader("Analysis Result")
+
+        st.write(analysis_result)
 
 
 def main():
