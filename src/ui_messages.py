@@ -1,0 +1,15 @@
+APP_DESCRIPTION = (
+    "Upload a resume and compare it with a job description. "
+    "The system will analyze the resume against the job requirements "
+    "and generate insights such as ATS score, skill gaps, and "
+    "improvement recommendations."
+)
+UPLOAD_RESUME_LABEL = "Upload Resume (PDF)"
+JOB_DESCRIPTION_LABEL = "Paste Job Description"
+ANALYZE_BUTTON_TEXT = "Analyze Resume"
+UPLOAD_WARNING = "Please upload a resume."
+JOB_DESCRIPTION_WARNING = "Please enter a job description."
+RESUME_PROCESSED_SUCCESS = "Resume processed successfully."
+EXTRACTED_TEXT_HEADER = "Extracted Resume Text"
+RESUME_CONTENT_LABEL = "Resume Content"
+ANALYSIS_RESULT_HEADER = "Analysis Result"

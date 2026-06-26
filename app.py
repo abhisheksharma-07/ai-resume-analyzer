@@ -1,6 +1,29 @@
 import streamlit as st
 from src.pdf_parser import extract_text_from_pdf
 from src.analyzer import analyze_resume
+from src.ui import display_analysis_dashboard
+from src.validators import validate_analysis
+from src.exceptions import ResumeAnalysisError
+from src.constants import (
+    JOB_DESCRIPTION_HEIGHT,
+    PAGE_LAYOUT,
+    PAGE_TITLE,
+    RESUME_ANALYSIS_FAILED_MESSAGE,
+    RESUME_TEXT_HEIGHT,
+    SUPPORTED_FILE_TYPES,
+)
+from src.ui_messages import (
+    ANALYSIS_RESULT_HEADER,
+    ANALYZE_BUTTON_TEXT,
+    APP_DESCRIPTION,
+    EXTRACTED_TEXT_HEADER,
+    JOB_DESCRIPTION_LABEL,
+    JOB_DESCRIPTION_WARNING,
+    RESUME_CONTENT_LABEL,
+    RESUME_PROCESSED_SUCCESS,
+    UPLOAD_RESUME_LABEL,
+    UPLOAD_WARNING,
+)
 
 
 def configure_page():
@@ -12,8 +35,8 @@ def configure_page():
     Returns:None
     """
     st.set_page_config(
-        page_title="AI Resume Analyzer",
-        layout="wide"
+        page_title=PAGE_TITLE,
+        layout=PAGE_LAYOUT
     )
 
 
@@ -22,15 +45,8 @@ def display_header():
     Display the application title and description.
     Returns: None
     """
-    st.title("AI Resume Analyzer")
-    st.write(
-        """
-        Upload a resume and provide a job description.
-        The system will analyze the resume against the job requirements
-        and generate insights such as ATS score, skill gaps, and
-        improvement recommendations.
-        """
-    )
+    st.title(PAGE_TITLE)
+    st.write(APP_DESCRIPTION)
 
 
 def collect_user_input() -> tuple:
@@ -41,12 +57,12 @@ def collect_user_input() -> tuple:
             job_description (str): Job description entered by the user
     """
     uploaded_resume = st.file_uploader(
-        label="Upload Resume (PDF)",
-        type=["pdf"]
+    label=UPLOAD_RESUME_LABEL,
+    type=SUPPORTED_FILE_TYPES
     )
     job_description = st.text_area(
-        label="Paste Job Description",
-        height=200
+        label=JOB_DESCRIPTION_LABEL,
+        height=JOB_DESCRIPTION_HEIGHT
     )
     return uploaded_resume, job_description
 
@@ -59,21 +75,27 @@ def handle_analysis_request(uploaded_resume, job_description: str):
     job_description (str): Job description entered by the user.
     Returns: None
     """
-    if st.button("Analyze Resume"):
+    if st.button(ANALYZE_BUTTON_TEXT):
         if uploaded_resume is None:
-            st.warning("Please upload a resume.")
+            st.warning(UPLOAD_WARNING)
             return
         if not job_description.strip():
-            st.warning("Please enter a job description.")
+            st.warning(JOB_DESCRIPTION_WARNING)
             return
-        resume_text = extract_text_from_pdf(uploaded_resume)
-        analysis_result = analyze_resume(resume_text=resume_text, job_description=job_description)
+        try:
+            resume_text = extract_text_from_pdf(uploaded_resume=uploaded_resume)
+            analysis_data = analyze_resume(
+                resume_text=resume_text,
+                job_description=job_description
+            )
+            analysis_data = validate_analysis(analysis_data=analysis_data)
+            st.success(RESUME_PROCESSED_SUCCESS)
+            display_analysis_dashboard(analysis=analysis_data)
 
-        st.success("Resume analyzed successfully.")
-
-        st.subheader("Analysis Result")
-
-        st.write(analysis_result)
+        except ResumeAnalysisError as exception:
+            st.error(
+                f"{RESUME_ANALYSIS_FAILED_MESSAGE}\n\nReason: {exception}"
+            )
 
 
 def main():
