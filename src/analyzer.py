@@ -1,7 +1,8 @@
 import os
 import json
+import streamlit as st
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 from src.prompts import RESUME_ANALYSIS_PROMPT
 from src.constants import (
     GEMINI_API_KEY_ENV,
@@ -13,6 +14,17 @@ from src.exceptions import ResumeAnalysisError
 
 
 load_dotenv()
+api_key = os.getenv(
+    GEMINI_API_KEY_ENV
+)
+if not api_key:
+    raise ResumeAnalysisError(
+        GEMINI_API_KEY_NOT_FOUND_ERROR
+    )
+CLIENT = genai.Client(
+    api_key=api_key
+)
+
 
 def _create_analysis_prompt(resume_text: str, job_description: str):
     """
@@ -34,12 +46,7 @@ def _generate_analysis(prompt: str):
     Parameters: prompt (str): Prompt sent to the Gemini model.
     Returns: Raw response returned by Gemini.
     """
-    api_key = os.getenv(GEMINI_API_KEY_ENV)
-    if not api_key:
-        raise ResumeAnalysisError(GEMINI_API_KEY_NOT_FOUND_ERROR)
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(MODEL_NAME)
-    response = model.generate_content(prompt)
+    response = CLIENT.models.generate_content(model=MODEL_NAME, contents=prompt,)
     return response.text
 
 
@@ -66,6 +73,7 @@ def _clean_json_response(response_text: str):
         raise ResumeAnalysisError(INVALID_JSON_RESPONSE_ERROR) from exception
 
 
+@st.cache_data(show_spinner=False)
 def analyze_resume(resume_text: str, job_description: str):
     """
     Analyze a resume against a job description using Gemini.

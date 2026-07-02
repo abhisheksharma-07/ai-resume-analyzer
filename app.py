@@ -5,21 +5,20 @@ from src.ui import display_analysis_dashboard
 from src.validators import validate_analysis
 from src.exceptions import ResumeAnalysisError
 from src.constants import (
+    DOCUMENT_TYPE,
+    DOCUMENT_VALIDATION_MESSAGE,
     JOB_DESCRIPTION_HEIGHT,
     PAGE_LAYOUT,
     PAGE_TITLE,
     RESUME_ANALYSIS_FAILED_MESSAGE,
-    RESUME_TEXT_HEIGHT,
+    RESUME_DOCUMENT_TYPE,
     SUPPORTED_FILE_TYPES,
 )
 from src.ui_messages import (
-    ANALYSIS_RESULT_HEADER,
     ANALYZE_BUTTON_TEXT,
     APP_DESCRIPTION,
-    EXTRACTED_TEXT_HEADER,
     JOB_DESCRIPTION_LABEL,
     JOB_DESCRIPTION_WARNING,
-    RESUME_CONTENT_LABEL,
     RESUME_PROCESSED_SUCCESS,
     UPLOAD_RESUME_LABEL,
     UPLOAD_WARNING,
@@ -88,6 +87,10 @@ def handle_analysis_request(uploaded_resume, job_description: str):
                 resume_text=resume_text,
                 job_description=job_description
             )
+            if (analysis_data[DOCUMENT_TYPE] != RESUME_DOCUMENT_TYPE):
+                st.error(analysis_data[DOCUMENT_VALIDATION_MESSAGE])
+                return
+
             analysis_data = validate_analysis(analysis_data=analysis_data)
             st.success(RESUME_PROCESSED_SUCCESS)
             display_analysis_dashboard(analysis=analysis_data)
