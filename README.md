@@ -204,7 +204,7 @@ GEMINI_API_KEY=YOUR_API_KEY
 streamlit run app.py
 ```
 
-# 🔮 Future Improvements
+# Future Improvements
 
 * Export reports as PDF.
 * Support Microsoft Word (.docx) resumes.
